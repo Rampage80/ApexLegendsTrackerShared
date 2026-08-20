@@ -34,6 +34,6 @@ jobs:
       - name: Push to GitHub Packages
         run: |
           dotnet nuget push "./artifacts/*.nupkg" \
-            --source "https://nuget.pkg.github.com/mvannatten/index.json" \
+            --source "https://nuget.pkg.github.com/Rampage80/index.json" \
             --api-key ${{ secrets.GITHUB_TOKEN }} \
             --skip-duplicate
