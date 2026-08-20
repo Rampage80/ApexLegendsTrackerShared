@@ -54,7 +54,7 @@
 
 ## Open coordination work
 - Stand up a real package feed reachable from CI (e.g. GitHub Packages) for `ApexLegendsTracker.Shared`, update both workflows to authenticate/restore from it, and retire the local-only `NuGet.Config` source once done.
-- Give `ApexLegendsTrackerShared` its own git history/remote if it should be versioned and released independently of the parent `DevProjects` repo.
+- `ApexLegendsTrackerShared` now has its own dedicated GitHub repo: `https://github.com/Rampage80/ApexLegendsTrackerShared` (extracted from the `DevProjects` monorepo, own `.gitignore` excluding `bin/`, `obj/`, `LocalFeed/`).
 - Create Kubernetes manifests and Helm values for the app and dependencies.
 - Add telemetry instrumentation, dashboards, and alerting.
 - Decide whether the showcase includes AI/haystack search features or remains a pure API resilience and cloud-native observability showcase.
