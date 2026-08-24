@@ -1,0 +1,6 @@
+dotnet nuget add source
+  --username Rampage80
+  --password <GithubPATPasswordHere>
+  --store-password-in-clear-text
+  --name github-rampage80
+  "https://nuget.pkg.github.com/Rampage80/index.json"
