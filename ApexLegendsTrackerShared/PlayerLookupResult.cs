@@ -36,12 +36,6 @@ public sealed class PlayerGlobalStats
 	public int ToNextLevelPercent { get; init; }
 
 	public PlayerBanStatus Bans { get; init; } = new();
-
-	public PlayerRank Arena { get; init; } = new();
-
-	public PlayerBattlepass Battlepass { get; init; } = new();
-
-	public List<PlayerBadge> Badges { get; init; } = [];
 }
 
 public sealed class PlayerBanStatus
@@ -49,18 +43,6 @@ public sealed class PlayerBanStatus
 	public bool IsActive { get; init; }
 
 	public int RemainingSeconds { get; init; }
-}
-
-public sealed class PlayerBattlepass
-{
-	public int? Level { get; init; }
-}
-
-public sealed class PlayerBadge
-{
-	public string Name { get; init; } = string.Empty;
-
-	public int Value { get; init; }
 }
 
 public sealed class PlayerRank
@@ -109,9 +91,6 @@ public sealed class SelectedLegend
 
 	public List<LegendStat> Data { get; init; } = [];
 
-	// Additive (v1.1.0).
-	public LegendGameInfo? GameInfo { get; init; }
-
 	public LegendImageAssets? ImgAssets { get; init; }
 }
 
@@ -120,27 +99,6 @@ public sealed class LegendBreakdown
 	public List<LegendStat> Data { get; init; } = [];
 
 	public LegendImageAssets? ImgAssets { get; init; }
-}
-
-public sealed class LegendGameInfo
-{
-	public string? Skin { get; init; }
-
-	public string? SkinRarity { get; init; }
-
-	public string? Frame { get; init; }
-
-	public string? FrameRarity { get; init; }
-
-	public string? Pose { get; init; }
-
-	public string? PoseRarity { get; init; }
-
-	public string? Intro { get; init; }
-
-	public string? IntroRarity { get; init; }
-
-	public List<PlayerBadge> Badges { get; init; } = [];
 }
 
 public sealed class LegendImageAssets

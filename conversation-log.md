@@ -38,6 +38,7 @@
 - User requested practical AI-context efficiency improvements for the Web project.
 - Added compact `.github/copilot-instructions.md`, scoped C#/Razor/test `.instructions.md` files, `.vscode/settings.json` exclusions for `bin/`, `obj/`, and `.git`, and `docs/api-contract.md` as the targeted API reference.
 - No runtime or cross-repository API behavior changed. Validation is the Web build; the backend repository was not available in this workspace for instruction alignment.
+- User requested the lookup contract and results UI be narrowed to rank/legend imagery, level progress, and all-character stats. Removed arena, battlepass, badges, and selected-legend game-info fields; bumped the shared package to `1.2.0`; updated the Web results page and tests. Added the missing local package source to the Web `NuGet.Config` so the new package can restore locally. Backend repository is unavailable, so its package reference and response mapping remain an open follow-up.
 - User requested the same AI-context efficiency improvements for the Service repo.
 - Added compact `.github/copilot-instructions.md`, scoped C#/test `.instructions.md` files, `.vscode/settings.json` exclusions for `bin/`, `obj/`, and `.git`, and `docs/api-contract.md` covering the confirmed backend endpoint, shared result shape, error behavior, configuration, and credential handling.
 - No runtime or cross-repository API behavior changed. Validation: `dotnet build ApexLegendsTracker.slnx --no-restore` succeeded with no errors or warnings.
