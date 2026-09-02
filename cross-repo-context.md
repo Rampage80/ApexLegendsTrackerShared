@@ -11,8 +11,8 @@
 - Route: `GET /api/v1/players/{platform}/{playerName}`
 - Valid platforms: `PC`, `PS4`, `X1`
 - Request validation: `playerName` is required; invalid platform returns `400`
-- Success response: `200 OK` with `PlayerLookupResult`
-- Shape: `PlayerName`, `Platform`, `RawJson`
+- Success response: `200 OK` with structured `PlayerLookupResult`
+- Shape: `PlayerName`, `Platform`, `Global`, `Realtime`, `Legends`
 - Error style: `400` for invalid inputs, upstream failures are surfaced as status codes with a trace identifier
 
 ## Known contract alignment issues
@@ -40,7 +40,7 @@
 - Quality baseline: automated tests, linting, SAST, IaC validation, and container scanning.
 
 ## Shared contracts package
-- `ApexLegendsTrackerShared` (solution `ApexLegendsTrackerShared.slnx`, class library `ApexLegendsTrackerShared/ApexLegendsTrackerShared.csproj`, `net10.0`) is packed as NuGet package `ApexLegendsTracker.Shared` (currently `1.0.0`), `GeneratePackageOnBuild=true`, output to `ApexLegendsTrackerShared/LocalFeed`.
+- `ApexLegendsTrackerShared` (solution `ApexLegendsTrackerShared.slnx`, class library `ApexLegendsTrackerShared/ApexLegendsTrackerShared.csproj`, `net10.0`) is packed as NuGet package `ApexLegendsTracker.Shared` (currently `1.1.0`), `GeneratePackageOnBuild=true`, output to `ApexLegendsTrackerShared/LocalFeed`.
 - Canonical contract: `ApexLegendsTracker.Shared.PlayerLookupResult` (`PlayerName`, `Platform`, `Global`, `Realtime`, `Legends` — the structured shape, no `RawJson`) and `IPlayerLookupContract.QueryByNameAsync(playerName, platform, cancellationToken)`.
 - Both repos consume it via `PackageReference` to `ApexLegendsTracker.Shared`:
   - Service: `ApexLegendsTracker.Application.csproj` references the package; `ApexTrackerService` (in `ApexLegendsTracker.Service`) implements `IPlayerLookupContract` and deserializes the upstream `bridge` response directly into `PlayerLookupResult` (case-insensitive JSON), then overwrites `PlayerName`/`Platform` with the request values. The old local `IApexTrackerService`/`PlayerLookupResult` in `ApexLegendsTracker.Application/Players` were deleted.
@@ -53,6 +53,9 @@
 - Resolved by making the structured shape (`Global`/`Realtime`/`Legends`, no `RawJson`) canonical in the shared package; the Service now parses the upstream JSON into that shape instead of passing it through as a string.
 
 ## Open coordination work
+- **AI context efficiency (2026-09-02):** The Shared repo now has compact global Copilot guidance, scoped C#/test instruction files, workspace exclusions for generated output, and a concise contract reference. The Web and Service repos were not available in this workspace, so their existing guidance could not be compared directly; no runtime or package contract behavior changed.
+- **AI context efficiency (2026-09-02):** The Web repo now has compact global Copilot guidance, scoped C#/Razor/test instruction files, workspace exclusions for generated output, and a concise API contract reference. Keep backend/shared guidance similarly scoped when those repositories are available; avoid duplicating the contract across instruction files.
+- **AI context efficiency (2026-09-02):** The Service repo now has compact backend-specific Copilot guidance, scoped C#/test instruction files, workspace exclusions for generated output, and a concise API contract reference. No runtime or cross-repository API behavior changed.
 - Stand up a real package feed reachable from CI (e.g. GitHub Packages) for `ApexLegendsTracker.Shared`, update both workflows to authenticate/restore from it, and retire the local-only `NuGet.Config` source once done.
 - `ApexLegendsTrackerShared` now has its own dedicated GitHub repo: `https://github.com/Rampage80/ApexLegendsTrackerShared` (extracted from the `DevProjects` monorepo, own `.gitignore` excluding `bin/`, `obj/`, `LocalFeed/`).
 - Create Kubernetes manifests and Helm values for the app and dependencies.

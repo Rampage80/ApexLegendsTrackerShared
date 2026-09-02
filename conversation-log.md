@@ -33,3 +33,16 @@
 - Labeled the four still-fabricated `Home.razor` dashboard widgets (current map, live leaderboard, server health, predator RP thresholds, map rotation panel, leaderboard panel, rank-progression panel) with a new `.preview-badge` CSS class so they read as preview/non-live data per the roadmap's own "data is clearly labeled" acceptance criteria, rather than removing them outright (no map-rotation/leaderboard/server-health endpoint exists yet).
 - Extended `ApexLegendsTracker.Web.Tests/UnitTest1.cs` with assertions for the new fields (`Tag`, `LevelPrestige`, `ToNextLevelPercent`, `Bans.IsActive`, `Arena.RankName`, `Badges.Count`, `Realtime.LobbyState`/`IsInGame`, `Legends.Selected.GameInfo`/`ImgAssets`, `Legends.All`) against the real fixture; confirms case-insensitive JSON deserialization (already relied upon by the existing `Global.Name` assertion) picks up the new properties correctly. Test passes.
 - Open/unresolved: the `ApexLegendsTrackerService` repo is not present in this workspace, so it was not updated to reference `ApexLegendsTracker.Shared` 1.1.0 — until it does, the Service will keep returning only the fields it already parses today (the new properties will simply default/empty for Web consumers hitting the live Service, since the Service's own upstream-JSON-to-`PlayerLookupResult` deserialization needs to run against the new package too). Also unresolved: the local `1.1.0` package was not published to GitHub Packages (`github-rampage80`), only packed to the local dev feed — CI and any other machine restoring from GitHub Packages will still see `1.0.0` until someone runs `dotnet nuget push` with a PAT.
+
+## 2026-09-02
+- User requested practical AI-context efficiency improvements for the Web project.
+- Added compact `.github/copilot-instructions.md`, scoped C#/Razor/test `.instructions.md` files, `.vscode/settings.json` exclusions for `bin/`, `obj/`, and `.git`, and `docs/api-contract.md` as the targeted API reference.
+- No runtime or cross-repository API behavior changed. Validation is the Web build; the backend repository was not available in this workspace for instruction alignment.
+- User requested the same AI-context efficiency improvements for the Service repo.
+- Added compact `.github/copilot-instructions.md`, scoped C#/test `.instructions.md` files, `.vscode/settings.json` exclusions for `bin/`, `obj/`, and `.git`, and `docs/api-contract.md` covering the confirmed backend endpoint, shared result shape, error behavior, configuration, and credential handling.
+- No runtime or cross-repository API behavior changed. Validation: `dotnet build ApexLegendsTracker.slnx --no-restore` succeeded with no errors or warnings.
+
+## 2026-09-02 (continued)
+- User requested the same AI-context efficiency improvements for the Shared repo.
+- Added compact `.github/copilot-instructions.md`, scoped C#/test instruction files, `.vscode/settings.json` exclusions for generated output, and `docs/api-contract.md` covering the package, public contract, compatibility rules, and explicit build/pack commands.
+- No runtime or package contract behavior changed. Validation: `dotnet build ApexLegendsTrackerShared.slnx -c Release` succeeded with no errors or warnings. Solution build did not emit a package; explicit project packaging remains the package-output check.

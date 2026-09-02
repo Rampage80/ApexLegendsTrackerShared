@@ -1,0 +1,14 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/bin": true,
+    "**/obj": true,
+    "**/LocalFeed": true
+  },
+  "search.exclude": {
+    "**/.git": true,
+    "**/bin/**": true,
+    "**/obj/**": true,
+    "**/LocalFeed/**": true
+  }
+}
