@@ -25,7 +25,8 @@ dotnet pack .\ApexLegendsTrackerShared\ApexLegendsTrackerShared.csproj -c Releas
 
 ## Public API
 
-- `IPlayerLookupContract.QueryByNameAsync(string playerName, string platform, CancellationToken cancellationToken = default)` is the framework-neutral lookup abstraction.
+- This package contains only DTOs: `PlayerLookupResult`, `MapRotationResponse`, and `PredatorResponse`. It exposes no interfaces.
+- `IPlayerLookupContract` (the lookup query signature) now lives in the Service repo (`ApexLegendsTracker.Service.Services`), since only the Service implements and consumes it.
 - `PlayerLookupResult` is the canonical response envelope.
 - `PlayerLookupResult` contains `PlayerName`, `Platform`, `Global`, `Realtime`, and `Legends`.
 - Nested DTOs carry account, rank, presence, selected-legend, per-legend, badge, and image data. Their C# property names are also the expected JSON names.

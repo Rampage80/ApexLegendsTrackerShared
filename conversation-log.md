@@ -54,6 +54,10 @@
 - Updated README and `docs/api-contract.md`. No existing player endpoint or shared package contract changed.
 - Validation: `dotnet build ApexLegendsTracker.slnx --no-restore` succeeded with 0 errors and 0 warnings; `dotnet test ApexLegendsTracker.slnx --no-restore --verbosity minimal` passed 3 tests.
 - Open follow-up: capture real responses from the two new endpoints, then add stable DTOs/shared client models and coordinated Web UI tests.
+- Moved the captured `MapRotationResponse` and `PredatorResponse` DTOs into the shared package, bumped it from `1.3.0` to `1.4.0`, removed the duplicate Service DTOs, and aligned Service/Web package references. Added the Service local feed source and updated fixture tests to use `ApexLegendsTracker.Shared`.
+- Validation: shared package `1.4.0` packed successfully; Service solution restore/build/tests passed with 4 tests and no errors or warnings after correcting the stale controller namespace.
+- Refactored the Service's upstream calls so `ApexTrackerService` uses the new `IApexApiClient`/`ApexApiClient` boundary for player, map rotation, and Predator requests. Centralized authentication, streamed deserialization, upstream errors, invalid JSON, and empty responses in the reusable client for future logging and observability.
+- Validation: `dotnet test ApexLegendsTracker.slnx --no-restore --verbosity minimal` passed 3 tests with no errors or warnings.
 - User supplied `MapRotation_APIReturns.json` and `Predator_APIReturns.json` fixtures from the Service tests.
 - Replaced raw `JsonElement` status responses with backend DTO contracts. Map rotation models `battle_royale`, `ranked`, `ltm`, and `wildcard`, sharing one current/next entry type and preserving LTM `eventName`. Predator models PC/PS4/X1 and intentionally excludes SWITCH.
 - Added fixture-backed tests and documented the new response shapes. Focused service tests passed 2/2; solution build remained clean with 0 errors and 0 warnings.
@@ -63,3 +67,9 @@
 - User asked whether the release tag should be created earlier in the workflow.
 - Moved the existing-tag duplicate check to run right after reading the version, before .NET setup/restore/build/pack, gating every later step on it; a re-run for an already-published version now short-circuits immediately instead of paying for a full build/pack/push first. Actual tag creation stays last, after a successful package push, so a failed build never leaves a tag for a version that was never published.
 - Not run in CI as part of this change; reviewed the YAML for correctness only.
+- User requested moving `IPlayerLookupContract` out of the shared package and into the Service repo, plus a version bump to `1.5.0`.
+- Confirmed via both repos that only the Service implements/consumes `IPlayerLookupContract` (the Web only uses the `PlayerLookupResult` DTO through its own `IApexTrackerApiClient` abstraction), matching the existing precedent of `IApexStatusContract` living locally in the Service.
+- Deleted `IPlayerLookupContract.cs` from the Shared repo and bumped its package `<Version>` to `1.5.0`. Added the equivalent interface to the Service repo at `ApexLegendsTracker.Service/Services/IPlayerLookupContract.cs` (namespace `ApexLegendsTracker.Service.Services`), bumped the Service's `PackageReference` to `1.5.0`, and added a `using ApexLegendsTracker.Service.Services;` to `PlayersController.cs` since the type moved out of `ApexLegendsTracker.Shared`. Updated both repos' `docs/api-contract.md`.
+- Added the missing `ApexLegendsTrackerSharedLocal` NuGet source to the Service's `NuGet.Config` so `1.5.0` restores locally (mirroring the Web repo's existing setup).
+- Validation: Shared `dotnet build`/`dotnet pack` (Release) succeeded with no errors/warnings and regenerated `LocalFeed`. Service `dotnet restore`, `dotnet build ApexLegendsTracker.slnx`, and `dotnet test` all succeeded with 0 errors/warnings and 3 tests passing.
+- Open follow-up: the Web repo's `PackageReference` still targets `1.4.0`; this is safe since it never used the interface, but bumping it to `1.5.0` for parity was not done (no functional need identified).
