@@ -47,3 +47,19 @@
 - User requested the same AI-context efficiency improvements for the Shared repo.
 - Added compact `.github/copilot-instructions.md`, scoped C#/test instruction files, `.vscode/settings.json` exclusions for generated output, and `docs/api-contract.md` covering the package, public contract, compatibility rules, and explicit build/pack commands.
 - No runtime or package contract behavior changed. Validation: `dotnet build ApexLegendsTrackerShared.slnx -c Release` succeeded with no errors or warnings. Solution build did not emit a package; explicit project packaging remains the package-output check.
+
+## 2026-09-07
+- User requested REST APIs for map rotation and Predator thresholds based on the Apex Legends API Portal, with error handling.
+- Implemented backend `GET /api/v1/map-rotation?version=1|2` and `GET /api/v1/predator-thresholds`. The service forwards the existing Authorization header, streams upstream JSON, preserves the undocumented response payloads as `JsonElement`, validates map-rotation version, passes through documented upstream status codes with a trace identifier, and returns `502` for empty or invalid JSON responses.
+- Updated README and `docs/api-contract.md`. No existing player endpoint or shared package contract changed.
+- Validation: `dotnet build ApexLegendsTracker.slnx --no-restore` succeeded with 0 errors and 0 warnings; `dotnet test ApexLegendsTracker.slnx --no-restore --verbosity minimal` passed 3 tests.
+- Open follow-up: capture real responses from the two new endpoints, then add stable DTOs/shared client models and coordinated Web UI tests.
+- User supplied `MapRotation_APIReturns.json` and `Predator_APIReturns.json` fixtures from the Service tests.
+- Replaced raw `JsonElement` status responses with backend DTO contracts. Map rotation models `battle_royale`, `ranked`, `ltm`, and `wildcard`, sharing one current/next entry type and preserving LTM `eventName`. Predator models PC/PS4/X1 and intentionally excludes SWITCH.
+- Added fixture-backed tests and documented the new response shapes. Focused service tests passed 2/2; solution build remained clean with 0 errors and 0 warnings.
+- User asked to avoid manually running `git tag`/`git push` for every release and instead drive publishing off a version defined in a code file.
+- Changed `.github/workflows/main.yml` to trigger on pushes to `master` that modify `ApexLegendsTrackerShared/ApexLegendsTrackerShared.csproj`, read `<Version>` from that file, build/pack/publish to GitHub Packages, and auto-create/push the matching `vX.Y.Z` tag (skipped if it already exists). Updated `docs/api-contract.md` with the new release process. `contents: read` permission was raised to `contents: write` so the workflow can push the tag.
+- Not run in CI as part of this change (requires an actual push to `master`); reviewed the YAML for correctness only.
+- User asked whether the release tag should be created earlier in the workflow.
+- Moved the existing-tag duplicate check to run right after reading the version, before .NET setup/restore/build/pack, gating every later step on it; a re-run for an already-published version now short-circuits immediately instead of paying for a full build/pack/push first. Actual tag creation stays last, after a successful package push, so a failed build never leaves a tag for a version that was never published.
+- Not run in CI as part of this change; reviewed the YAML for correctness only.

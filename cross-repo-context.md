@@ -9,11 +9,14 @@
 
 ## Confirmed API contract
 - Route: `GET /api/v1/players/{platform}/{playerName}`
+- Route: `GET /api/v1/map-rotation?version=1|2` (version optional)
+- Route: `GET /api/v1/predator-thresholds`
 - Valid platforms: `PC`, `PS4`, `X1`
 - Request validation: `playerName` is required; invalid platform returns `400`
 - Success response: `200 OK` with structured `PlayerLookupResult`
 - Shape: `PlayerName`, `Platform`, `Global`, `Realtime`, `Legends`
 - Error style: `400` for invalid inputs, upstream failures are surfaced as status codes with a trace identifier
+- Map rotation uses backend `MapRotationResponse` with `BattleRoyale`, `Ranked`, `Ltm`, and `Wildcard` modes, each containing shared `Current` and `Next` entries; LTM preserves `EventName`. Predator uses `PredatorResponse.RP` with `PC`, `PS4`, and `X1`; `SWITCH` is excluded. The backend validates map-rotation `version` as `1` or `2` and maps invalid/empty upstream payloads to `502`.
 
 ## Known contract alignment issues
 - UI code currently calls `api/v1/players/{encodedPlatform}/{encodedPlayerName}` and expects a `PlayerLookupResult` payload.
@@ -26,6 +29,10 @@
 - `Program.cs` reads `ApiBaseUrl` from configuration; Blazor WASM automatically layers `wwwroot/appsettings.{Environment}.json` over `wwwroot/appsettings.json` based on the hosting environment (Development locally via `dotnet run`, Production when served statically from Azure App Service) — no env vars or code changes needed.
 - Added `ApexLegendsTracker.Web/wwwroot/appsettings.Production.json` with `ApiBaseUrl` = `https://apexlegendstrackerservice-fbfjfgbwhpffexfx.centralus-01.azurewebsites.net/` so the deployed UI targets the deployed backend App Service; local `appsettings.json` keeps `http://localhost:5165/`.
 - Open item: backend CORS (`Cors:AllowedOrigins`) must include the deployed UI's origin (Azure Web App `ApexLegendsTracker` URL) in production — could not verify because the backend repo is not present in this workspace.
+
+## Release automation
+- `ApexLegendsTrackerShared`'s package version lives only in `ApexLegendsTrackerShared/ApexLegendsTrackerShared.csproj` (`<Version>`).
+- `.github/workflows/main.yml` now triggers on pushes to `master` that touch that csproj, builds/packs/publishes to GitHub Packages, then auto-creates and pushes the matching `vX.Y.Z` git tag (skipped if it already exists). Manual `git tag`/`git push` is no longer required.
 
 ## Modernization direction
 - Target architecture: AWS EKS with containerized .NET services, API gateways/load balancers, managed backing services, and autoscaling.
@@ -53,6 +60,7 @@
 - Resolved by making the structured shape (`Global`/`Realtime`/`Legends`, no `RawJson`) canonical in the shared package; the Service now parses the upstream JSON into that shape instead of passing it through as a string.
 
 ## Open coordination work
+- **Status API response schemas (2026-09-07):** Real map rotation and Predator fixtures were added to the Service tests. Backend DTOs now model the captured fields: shared current/next map entries across battle royale, ranked, LTM, and wildcard modes; LTM event names; and PC/PS4/X1 Predator thresholds while excluding SWITCH. The Web can now consume these stable backend response shapes when UI integration is requested.
 - **Contract v1.2.0 (2026-09-02):** Removed arena, battlepass, badges, and selected-legend game-info fields. Retained rank imagery, selected-legend icon/banner, `toNextLevelPercent`, and all-character icon/stat data. The Web displays these retained fields; the backend must consume and publish the same shared package version.
 - **AI context efficiency (2026-09-02):** The Shared repo now has compact global Copilot guidance, scoped C#/test instruction files, workspace exclusions for generated output, and a concise contract reference. The Web and Service repos were not available in this workspace, so their existing guidance could not be compared directly; no runtime or package contract behavior changed.
 - **AI context efficiency (2026-09-02):** The Web repo now has compact global Copilot guidance, scoped C#/Razor/test instruction files, workspace exclusions for generated output, and a concise API contract reference. Keep backend/shared guidance similarly scoped when those repositories are available; avoid duplicating the contract across instruction files.

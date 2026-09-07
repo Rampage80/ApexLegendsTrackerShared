@@ -5,17 +5,23 @@ This repository owns the versioned NuGet package consumed by the ApexLegendsTrac
 ## Package
 
 - Package ID: `ApexLegendsTrackerShared`
-- Current version: `1.1.0`
+- Version is defined only in `ApexLegendsTrackerShared/ApexLegendsTrackerShared.csproj` (`<Version>`) — do not tag releases manually.
 - Target framework: `net10.0`
 - Local package output: `LocalFeed/`
 - Published package source: GitHub Packages for the `Rampage80` owner
 
-Use the explicit project commands below when validating package output:
+Use the explicit project commands below when validating package output locally:
 
 ```powershell
 dotnet build .\ApexLegendsTrackerShared\ApexLegendsTrackerShared.csproj -c Release
 dotnet pack .\ApexLegendsTrackerShared\ApexLegendsTrackerShared.csproj -c Release --no-build -o .\artifacts
 ```
+
+## Release process
+
+- Bump `<Version>` in `ApexLegendsTrackerShared/ApexLegendsTrackerShared.csproj` and push to `master`.
+- `.github/workflows/main.yml` triggers on that file changing, builds, packs, publishes to GitHub Packages, and creates/pushes the matching `vX.Y.Z` git tag automatically — no manual `git tag`/`git push` step needed.
+- If the derived tag already exists, tagging is skipped; `dotnet nuget push --skip-duplicate` makes re-runs safe.
 
 ## Public API
 

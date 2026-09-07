@@ -2,12 +2,13 @@ name: Publish NuGet Package
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    branches: [master]
+    paths:
+      - 'ApexLegendsTrackerShared/ApexLegendsTrackerShared.csproj'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -16,24 +17,57 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from csproj
+        id: version
+        run: |
+          VERSION=$(grep -oPm1 '(?<=<Version>)[^<]+' ApexLegendsTrackerShared/ApexLegendsTrackerShared.csproj)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check for existing release tag
+        id: check
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1 || git ls-remote --tags origin | grep -q "refs/tags/$TAG$"; then
+            echo "Tag $TAG already exists; skipping build/pack/publish."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Setup .NET
+        if: steps.check.outputs.exists != 'true'
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
 
       - name: Restore
+        if: steps.check.outputs.exists != 'true'
         run: dotnet restore
 
       - name: Build
+        if: steps.check.outputs.exists != 'true'
         run: dotnet build --configuration Release --no-restore
 
       - name: Pack
+        if: steps.check.outputs.exists != 'true'
         run: dotnet pack --configuration Release --no-build -o ./artifacts
 
       - name: Push to GitHub Packages
+        if: steps.check.outputs.exists != 'true'
         run: |
           dotnet nuget push "./artifacts/*.nupkg" \
             --source "https://nuget.pkg.github.com/Rampage80/index.json" \
             --api-key ${{ secrets.GITHUB_TOKEN }} \
             --skip-duplicate
+
+      - name: Tag release
+        if: steps.check.outputs.exists != 'true'
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "$TAG"
+          git push origin "$TAG"
