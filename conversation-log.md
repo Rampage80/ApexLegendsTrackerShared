@@ -43,6 +43,10 @@
 - Added compact `.github/copilot-instructions.md`, scoped C#/test `.instructions.md` files, `.vscode/settings.json` exclusions for `bin/`, `obj/`, and `.git`, and `docs/api-contract.md` covering the confirmed backend endpoint, shared result shape, error behavior, configuration, and credential handling.
 - No runtime or cross-repository API behavior changed. Validation: `dotnet build ApexLegendsTracker.slnx --no-restore` succeeded with no errors or warnings.
 
+## 2026-09-09
+- User asked which logging/telemetry/dashboard tool suits a small-scale, free operation, and whether Application Insights would work. Recommended App Insights given the Service is already on Azure App Service (free 5 GB/month ingestion, near-zero setup, native Azure integration, built on OpenTelemetry so it doesn't block the previously recorded OTel/Prometheus/Grafana + AWS EKS long-term direction). User accepted and asked to record the decision and begin implementation across both tiers, using the Shared repo for cross-tier telemetry naming.
+- Implemented in Service (`ApexLegendsTracker.WebAPI`/`ApexLegendsTracker.Service`): added `Microsoft.ApplicationInsights.AspNetCore` (WebAPI) and `Microsoft.ApplicationInsights` (Service) packages; `Program.cs` calls `AddApplicationInsightsTelemetry()` 
+
 ## 2026-09-02 (continued)
 - User requested the same AI-context efficiency improvements for the Shared repo.
 - Added compact `.github/copilot-instructions.md`, scoped C#/test instruction files, `.vscode/settings.json` exclusions for generated output, and `docs/api-contract.md` covering the package, public contract, compatibility rules, and explicit build/pack commands.
@@ -58,6 +62,10 @@
 - Validation: shared package `1.4.0` packed successfully; Service solution restore/build/tests passed with 4 tests and no errors or warnings after correcting the stale controller namespace.
 - Refactored the Service's upstream calls so `ApexTrackerService` uses the new `IApexApiClient`/`ApexApiClient` boundary for player, map rotation, and Predator requests. Centralized authentication, streamed deserialization, upstream errors, invalid JSON, and empty responses in the reusable client for future logging and observability.
 - Validation: `dotnet test ApexLegendsTracker.slnx --no-restore --verbosity minimal` passed 3 tests with no errors or warnings.
+- Renamed the Service tests by responsibility: `MapRotationResponseTests`, `PredatorResponseTests`, `ApexApiClientTests`, and `ApexTrackerServiceTests`; removed the generic `UnitTest1` file. Added coverage for request method/URI/authentication, typed deserialization, upstream status errors, invalid JSON, missing API keys, player URI encoding/metadata enrichment, and map/Predator request routing.
+- Validation: focused Service tests passed 10/10; full solution tests passed 11/11 with no errors or warnings.
+- Added a one-minute process-local `IMemoryCache` to `ApexApiClient` via `GetCachedAsync`. Map rotation and Predator calls use the cache; player lookups continue using uncached `GetAsync` to avoid sharing request-enriched metadata. Documented distributed caching as future work and aligned fixture paths with the user's `APIResponseData` directory.
+- Validation: focused Service tests passed 11/11; full solution tests passed 12/12 with no errors or warnings.
 - User supplied `MapRotation_APIReturns.json` and `Predator_APIReturns.json` fixtures from the Service tests.
 - Replaced raw `JsonElement` status responses with backend DTO contracts. Map rotation models `battle_royale`, `ranked`, `ltm`, and `wildcard`, sharing one current/next entry type and preserving LTM `eventName`. Predator models PC/PS4/X1 and intentionally excludes SWITCH.
 - Added fixture-backed tests and documented the new response shapes. Focused service tests passed 2/2; solution build remained clean with 0 errors and 0 warnings.
@@ -73,3 +81,5 @@
 - Added the missing `ApexLegendsTrackerSharedLocal` NuGet source to the Service's `NuGet.Config` so `1.5.0` restores locally (mirroring the Web repo's existing setup).
 - Validation: Shared `dotnet build`/`dotnet pack` (Release) succeeded with no errors/warnings and regenerated `LocalFeed`. Service `dotnet restore`, `dotnet build ApexLegendsTracker.slnx`, and `dotnet test` all succeeded with 0 errors/warnings and 3 tests passing.
 - Open follow-up: the Web repo's `PackageReference` still targets `1.4.0`; this is safe since it never used the interface, but bumping it to `1.5.0` for parity was not done (no functional need identified).
+- User requested one-minute shared caching for dashboard map rotation and Predator requests. Added Redis-backed `IDistributedCache` registration to the Service Web API and cache-aside logic to `ApexTrackerService`, keyed separately by map version and Predator thresholds. Documented `ConnectionStrings:DistributedCache`; all API instances must point to the same Redis deployment. Backend validation completed successfully and the Web build passed with no warnings.
+- User requested the Web dashboard focus on live map and Predator information after the shared package reached `1.5.0`. Added Web client methods for `GET /api/v1/map-rotation?version=1` and `GET /api/v1/predator-thresholds`; replaced hardcoded dashboard map, leaderboard, server-health, queue, and progression widgets with live shared DTO data. Web package reference is now `1.5.0`. Web build passed; tests were blocked by the existing missing `ExampleAPIJsonReturns.json` fixture.

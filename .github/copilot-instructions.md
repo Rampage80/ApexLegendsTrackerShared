@@ -17,6 +17,9 @@
 - When a public contract changes, inspect and validate the Web and Service repositories if they are available; record unavailable follow-up in `cross-repo-context.md`.
 - Ignore generated `bin/`, `obj/`, and `LocalFeed/` contents when reasoning about source changes.
 - For package validation, run the explicit project build/pack commands in `docs/api-contract.md`; solution build alone may not emit a `.nupkg`.
+- Every contract or package behavior change must add or update an automated serialization or compatibility test. Target at least 80% coverage of changed code and report the measured result.
+- This package has no runtime host, so do not invent host logging or telemetry dependencies. When changing telemetry names or shared instrumentation contracts, add/update the corresponding shared telemetry test and document the names for the Web and Service hosts.
+- Runtime code generated in the Web or Service repositories must use structured logging at appropriate `Trace`, `Debug`, `Information`, `Warning`, and `Error` levels and must emit telemetry; shared types must remain framework-neutral.
 
 ## Working style
 - Keep public APIs and existing formatting stable.
