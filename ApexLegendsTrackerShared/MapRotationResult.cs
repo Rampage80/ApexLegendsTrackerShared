@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace ApexLegendsTracker.Shared;
 
-public sealed class MapRotationResponse
+public sealed class MapRotationResult
 {
 	[JsonPropertyName("battle_royale")]
 	public MapRotationMode? BattleRoyale { get; init; }

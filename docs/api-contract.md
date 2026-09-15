@@ -1,6 +1,6 @@
 # Shared Contract Reference
 
-This repository owns the versioned NuGet package consumed by the ApexLegendsTracker Web and Service repositories.
+This repository owns the versioned NuGet package consumed by the ApexLegendsTracker Web, GameStats service, and AIChat service repositories.
 
 ## Package
 
@@ -40,4 +40,4 @@ dotnet pack .\ApexLegendsTrackerShared\ApexLegendsTrackerShared.csproj -c Releas
 
 ## Cross-repository coordination
 
-When the public API changes, update the Web and Service package references and serialization tests together. The Web and Service repositories may not be present in every workspace; record any unverified follow-up in `cross-repo-context.md`.
+When the public API changes, update the Web, GameStats service, and AIChat service package references and serialization tests together. These repositories may not be present in every workspace; record any unverified follow-up in `cross-repo-context.md`.

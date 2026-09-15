@@ -8,6 +8,9 @@ public static class TelemetryEvents
 	public const string PlayerLookupFailed = "PlayerLookupFailed";
 	public const string MapRotationRequested = "MapRotationRequested";
 	public const string PredatorThresholdsRequested = "PredatorThresholdsRequested";
+	public const string ChatRequested = "ChatRequested";
+	public const string ChatSucceeded = "ChatSucceeded";
+	public const string ChatFailed = "ChatFailed";
 }
 
 /// <summary>Custom Application Insights property names shared by the Web and Service tiers.</summary>

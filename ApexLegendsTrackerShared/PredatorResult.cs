@@ -1,6 +1,6 @@
 namespace ApexLegendsTracker.Shared;
 
-public sealed class PredatorResponse
+public sealed class PredatorResult
 {
 	public PredatorPlatformThresholds? RP { get; init; }
 }
